@@ -1,5 +1,17 @@
 # Grokking Geography
 
+Grokking is a delayed generalization phenomenon in neural network training. A model memorizes the training set (reaching ~100% train accuracy) long before it generalizes (test accuracy stays near random). Then, after thousands of additional gradient steps, test accuracy suddenly jumps to near-perfect — the model "groks" the task. First reported by Power et al. (2022) on modular arithmetic, grokking challenges the standard train/validation paradigm: the model appears to be overfitting, but is actually undergoing a slower phase of circuit formation that eventually generalizes.
+
+Subsequent work has described *what* happens during grokking — Nanda et al. (2023) showed that the model forms a Fourier basis to represent modular addition; Zhong et al. (2023) characterized the "clock" circuit. But these are *post-hoc descriptions* of the grokked state. They tell us what the circuit looks like, not which components *cause* the transition.
+
+This project asks three interventional questions:
+
+1. **Which transformer component updates actually *cause* grokking?** We freeze individual components (MLP, attention, embeddings) at the memorization step and measure whether grokking still occurs. This is a causal intervention, not a description.
+2. **Is grokking robust to label noise?** If grokking reflects genuine structure discovery, it should survive a small amount of noise. We test whether the sharp transition and the Fourier circuit persist under 5–40% corrupted labels.
+3. **What task properties predict where grokking occurs?** We map grokking behavior across a taxonomy of tasks (abelian vs non-abelian groups, commutative vs non-commutative operations) and ask whether the component roles discovered in Exp 1 generalize or reverse.
+
+All experiments use a tiny 1-layer transformer (full-width, no regularization) trained on algorithmic tasks with a 30% train split — the regime where grokking is most pronounced.
+
 **Research questions:**
 1. Which transformer components are necessary/sufficient for the grokking transition? (surgical freezing)
 2. Is grokking robust to label noise? Does it still discover the true circuit?
