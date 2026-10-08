@@ -10,7 +10,7 @@ This project asks three interventional questions:
 2. **Is grokking robust to label noise?** If grokking reflects genuine structure discovery, it should survive a small amount of noise. We test whether the sharp transition and the Fourier circuit persist under 5–40% corrupted labels.
 3. **What task properties predict where grokking occurs?** We map grokking behavior across a taxonomy of tasks (abelian vs non-abelian groups, commutative vs non-commutative operations) and ask whether the component roles discovered in Exp 1 generalize or reverse.
 
-All experiments use a tiny 1-layer transformer (full-width, no regularization) trained on algorithmic tasks with a 30% train split — the regime where grokking is most pronounced.
+All experiments use a tiny 1-layer transformer (full-width, no regularization) trained on algorithmic tasks with a 30% train split — the regime where grokking is most pronounced. While grokking was first observed in small models, recent work has identified analogous memorization-to-generalization transitions in LLM pretraining (arXiv:2506.21551), making the mechanism questions studied here relevant at scale.
 
 **Research questions:**
 1. Which transformer components are necessary/sufficient for the grokking transition? (surgical freezing)
@@ -63,14 +63,32 @@ python notebooks/s5_circuit_analysis.py
 
 ## Key Papers
 
-- Power et al. 2022 — original grokking
-- Nanda et al. 2023 — mechanistic interpretability (Fourier/Clock)
-- Zhong et al. 2023 — Clock vs Pizza
-- Prieto et al. 2025 — Softmax Collapse / numerical stability
-- Geometry of Multi-Task Grokking, Feb 2026 (avoid duplicating)
-- Geometric Inductive Bias paper, March 2026 (avoid duplicating)
+**Foundational:**
+- Power et al. 2022 (arXiv:2201.02177) — original grokking on modular arithmetic
+- Nanda et al. 2023 (arXiv:2301.05217) — mechanistic interpretability: Fourier/Clock circuit for modular addition
+- Zhong et al. 2023 (arXiv:2306.12644) — Clock vs Pizza: characterizing the grokked circuit
+- Prieto et al. 2025 — Softmax Collapse / numerical stability in grokking
+
+**Causal component roles (closest to Exp 1 & 4):**
+- Where Grokking Happens: Distributed Utility and Fourier Recoding — arXiv:2609.17571 (Sep 2026). Component attribution across width/head counts; attribution-based complement to our causal freezing.
+- Component Roles in Grokking Transfer and Stability — arXiv:2609.18078 (Sep 2026). Transfer acceleration and trajectory stability governed by distinct component roles; relates to our Exp 3 role reversal.
+- Structure-Specific Representational Priors Causally Control the Grokking Delay — arXiv:2607.04333 (Jul 2026). Grokking delay is causally the time to form the right representational structure; backs our Exp 1 framing.
+
+**Label noise (Exp 2):**
+- Doshi et al. 2023 (arXiv:2310.13061) — grokking on corrupted modular arithmetic is robust *with regularization* (weight decay/dropout/BatchNorm force ignoring corruption). Direct counterpart to our no-regularization fragility result.
+- Unveiling Memorization-Generalization Coexistence — arXiv:2605.18022 (May 2026). Two-layer nets under heavy noise: generalization structure forms latently but is masked by memorization; recoverable with frequency-based extraction even at 80% noise.
+
+**Non-abelian groups / S5 (Exp 3 & 4):**
+- Stander et al. 2023 (arXiv:2312.06581) — fully reverse-engineers FCNs that grokked S5/S6 arithmetic, discovering subgroup structure via cosets. Direct prior work for our S5 result.
+
+**Related — adjacent but non-overlapping:**
+- Geometry of Multi-Task Grokking — arXiv:2602.18523 (Xu, Feb 2026). Grokked solution is *holographic* (incompressible, sensitive to orthogonal perturbation). Tensions with our "single component is causally necessary" claim — worth reconciling.
+- Geometric Inductive Bias of Grokking — arXiv:2603.05228 (Yildirim, Mar 2026). Uses S5 as a *negative control*: L2-normalized residual stream eliminates grokking on Z_p but does not accelerate S5, suggesting the architectural prior must align with the task's intrinsic symmetries. Direct support for our abelian/non-abelian split.
+- Grokking From Abstraction to Intelligence — arXiv:2603.29262 (Mar 2026). Reframes grokking as parsimony-driven manifold collapse (Singular Learning Theory); contrasting mechanism story.
+- Grokking in LLM Pretraining — arXiv:2506.21551 (ICLR 2026). Memorization→generalization transition observable from MoE routing pathways in real LLM pretraining.
 
 ## Novel Contributions
+
 
 1. **Causal/interventional freezing study** — first to ask which component updates *cause* the grokking transition
 2. **Label noise mechanistic analysis** — existing work is purely descriptive; we do circuit-level analysis
@@ -100,6 +118,8 @@ python notebooks/s5_circuit_analysis.py
 - Grokking is **shockingly fragile**: even 5% label noise (191 corrupted labels out of 3830) prevents grokking across all 3 seeds. Test accuracy degrades gracefully (91.6% → 78.9% → 27.9% at 5/10/20%) but the sharp grokking transition disappears.
 - **Fourier alignment score** drops from 0.62 (clean) to 0.44–0.46 at 5–15% noise, suggesting the model partially discovers the Fourier structure but cannot complete the circuit under noise pressure.
 - At ≥25% noise, both Fourier score and test accuracy collapse to near-zero.
+
+**Prior work**: Doshi et al. 2023 (arXiv:2310.13061) showed grokking is robust to label noise *with regularization* (weight decay, dropout, BatchNorm force the model to ignore corruption). Our no-regularization setup isolates the fragile baseline — without these pressures, 5% noise kills the transition. See also arXiv:2605.18022 (May 2026), which shows the generalization structure forms latently under heavy noise but is masked by memorization.
 
 **Output**: `results/exp2_label_noise/`, `results/exp2_label_noise_ext/`
 
@@ -138,6 +158,8 @@ For S₅ compose, *all* components are more tightly coupled — no single compon
 **Note**: S₅ baseline grokked at 48,500 steps with seed 42, suggesting the taxonomy 50K-step limit may have been too short for seeds 42/43 in the run_taxonomy job — but the freeze-per-task baseline confirmed it does grok.
 
 **Output**: `results/exp3_taxonomy/`, `results/exp3_freeze_per_task/`
+
+**Prior work**: Stander et al. 2023 (arXiv:2312.06581) fully reverse-engineered one-hidden-layer FCNs that grokked S5 and S6 arithmetic, discovering that circuits decompose via the group's subgroup/coset structure. Consistent with our observation that S5 *does* grok (at ~48.5K steps with seed 42), just past the 50K taxonomy limit.
 
 ---
 
