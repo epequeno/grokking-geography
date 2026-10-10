@@ -1,16 +1,25 @@
 # Grokking Geography
 
-Grokking is a delayed generalization phenomenon in neural network training. A model memorizes the training set (reaching ~100% train accuracy) long before it generalizes (test accuracy stays near random). Then, after thousands of additional gradient steps, test accuracy suddenly jumps to near-perfect — the model "groks" the task. First reported by Power et al. (2022) on modular arithmetic, grokking challenges the standard train/validation paradigm: the model appears to be overfitting, but is actually undergoing a slower phase of circuit formation that eventually generalizes.
+**Which transformer components cause grokking, how fragile is it to label noise, and where across tasks does it happen?** An intervention-based study of delayed generalization: freeze components surgically at each run's own memorization step, corrupt training labels, and map grokking across a task battery — measuring what changes the transition instead of describing the endpoint.
 
-Subsequent work has described *what* happens during grokking — Nanda et al. (2023) showed that the model forms a Fourier basis to represent modular addition; Zhong et al. (2023) characterized the "clock" circuit. But these are *post-hoc descriptions* of the grokked state. They tell us what the circuit looks like, not which components *cause* the transition.
+Grokking (Power et al. 2022): a model memorizes (~100% train accuracy) long before it generalizes, then test accuracy jumps after thousands more steps — apparent overfitting that is really a slower phase of circuit formation. Prior work (Nanda et al. 2023, the Fourier basis; Zhong et al. 2023, the "clock" circuit) describes the *grokked endpoint*, post-hoc. None of it identifies which component updates *cause* the transition. That is this repo's question.
 
-This project asks three interventional questions:
+## The three questions
 
 1. **Which transformer component updates matter for grokking?** We freeze individual components (MLP, attention, embeddings) at each run's own memorization step and measure whether grokking still occurs, paired against a same-seed baseline. A control arm keeps weight decay on the frozen parameters, to separate "this component's gradient updates are needed" from "this component must be exempt from weight decay".
 2. **How robust is grokking to label noise?** We train with 5–50% corrupted training labels and track test accuracy on a clean test set, plus a Fourier-structure score compared against its chance floor.
 3. **What task properties predict where grokking occurs?** We map grokking behavior across a battery of tasks (group and non-group operations, commutative and non-commutative) and across depth (1 vs 2 layers).
 
-All experiments use a small transformer (d_model=128, 4 heads, d_mlp=512, 1 layer unless stated) trained with AdamW (lr 1e-3, **weight decay 1.0**, as in Nanda et al. 2023) on algorithmic tasks with a 30% train split. Weight decay is part of the setup; nothing here is "unregularized". Related work observing memorization-to-generalization transitions in LLM pretraining exists (arXiv:2506.21551), but this repo does not test whether anything here transfers to that setting.
+**Status:** all three experiments run; results are committed under `results/`, and every table below regenerates from it via `scripts/make_report.py`. Exp 1 and the Exp 3 taxonomy were re-run after the 2026-10 task fixes; Exp 2, the depth ablation and joint sufficiency come from earlier code — unchanged logic, not regenerated (see [Not re-run after the fixes](#not-re-run-after-the-fixes)).
+
+**Scope & limitations:** one architecture (d_model=128, 4 heads, d_mlp=512, 1 layer unless stated), one train fraction (30%), **weight decay 1.0 throughout** (AdamW, lr 1e-3, as in Nanda et al. 2023) — nothing here is "unregularized"; 3–5 seeds per condition, no confidence intervals; the 99% "grokked" threshold bins a continuous curve, so peak/final test accuracy is always reported alongside; freezing is not a clean causal ablation — the no-decay arm also exempts frozen weights from decay, and the arms disagree (Exp 1). Related work observes memorization-to-generalization transitions in LLM pretraining (arXiv:2506.21551); this repo does not test that anything transfers there. Full list: [Known limitations](#known-limitations).
+
+## Headline findings
+
+1. **Attention matrices are dispensable after memorization; the MLP and the embedding are where freezing hurts.** Freezing any single attention matrix (Q, K, V, O) at memorization still groks 5/5 at ~1× delay; freezing the whole MLP blocks 3/5 seeds within budget (~3.8× delay in the rest); the embedding blocks 2/5 (~11× in the rest).
+2. **The two freeze arms disagree, so "no-decay" freezing cannot be read as necessity.** With weight decay kept on frozen parameters, attn_all / embedding / unembedding grok 0/5 — where holding them fixed allows 5/5, 3/5 and 4/5. The decay exemption is a confound, not a footnote.
+3. **Grokking is fragile to label noise.** At 5% corrupted labels, test accuracy still reaches ~92%, but 0/3 runs grok; at ≥30% both collapse toward chance and the Fourier-structure score falls to its 0.067 chance floor.
+4. **Commutativity and group-ness do not predict grokking.** `mod_div` — non-commutative, not a group — groks 3/3; `dihedral_12` does not within 120K steps. S5 groks at 1 layer given ~44K–118K steps: "non-abelian groups fail at 1 layer" was a short-budget artifact.
 
 
 ## Project Structure
