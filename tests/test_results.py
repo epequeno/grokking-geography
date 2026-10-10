@@ -1,8 +1,6 @@
 """Tests for the immutable result artifact system."""
 
-import json
 import pytest
-from pathlib import Path
 
 from src.results import save_result, save_result_batch, load_results, load_latest, config_hash
 

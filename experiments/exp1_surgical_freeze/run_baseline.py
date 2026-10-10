@@ -9,16 +9,12 @@ Run:
     python experiments/exp1_surgical_freeze/run_baseline.py --prime 97 --steps 100000
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
-
 import argparse
 import json
-import torch
+import os
 import matplotlib.pyplot as plt
 
-from src.models.transformer import GrokTransformer, TransformerConfig
+from src.models.transformer import TransformerConfig, build_model
 from src.tasks import ModularAddition
 from src.training.trainer import GrokTrainer, TrainConfig
 from src.results import save_result
@@ -57,7 +53,7 @@ def main():
         d_mlp=args.d_mlp,
         n_layers=1,
     )
-    model = GrokTransformer(model_cfg)
+    model = build_model(model_cfg, args.seed)
     n_params = sum(p.numel() for p in model.parameters())
     print(f"Model: {n_params:,} parameters")
 

@@ -18,8 +18,15 @@ class TaskConfig:
     description: str = ""
     # Algebraic properties (for taxonomy analysis)
     is_commutative: bool = False
+    is_group: bool = False           # True only if (inputs, op) really is a group
     group_order: Optional[int] = None
     operation: str = ""
+    # Size of the output label space (labels are 0..n_classes-1). None -> vocab_size.
+    # Used when drawing corrupted labels so noise stays inside the real label set.
+    n_classes: Optional[int] = None
+    # True only where token index == additive residue mod vocab_size (mod_add), the
+    # only setting in which a DFT over token ids of W_E is meaningful.
+    fourier_valid: bool = False
 
 
 class TaskDataset(Dataset):
@@ -35,6 +42,7 @@ class TaskDataset(Dataset):
         train_frac: float = 0.3,
         noise_frac: float = 0.0,     # fraction of training labels to corrupt
         seed: int = 42,
+        valid_pair: Optional[Callable] = None,  # valid_pair(a, b) -> bool; False = pair excluded from train AND test
     ):
         self.cfg = task_cfg
         self.fn = fn
@@ -43,7 +51,8 @@ class TaskDataset(Dataset):
 
         p = task_cfg.vocab_size  # shorthand (often a prime)
         # Build full dataset: all (a, b) pairs
-        all_pairs = [(a, b) for a in range(p) for b in range(p)]
+        all_pairs = [(a, b) for a in range(p) for b in range(p)
+                     if valid_pair is None or valid_pair(a, b)]
         labels = [fn(a, b) for a, b in all_pairs]
 
         # Shuffle and split
@@ -57,16 +66,17 @@ class TaskDataset(Dataset):
         self.test_pairs   = [all_pairs[i] for i in test_idx]
         self.test_labels  = [labels[i] for i in test_idx]
 
-        # Apply label noise to training set
+        # Apply label noise to training set (test labels stay clean)
         if noise_frac > 0:
+            n_classes = task_cfg.n_classes or p
             n_corrupt = int(len(self.train_labels) * noise_frac)
             corrupt_idx = rng.choice(len(self.train_labels), n_corrupt, replace=False)
             for i in corrupt_idx:
-                # Replace with a random wrong label
+                # Replace with a random wrong label from the true label space
                 correct = self.train_labels[i]
                 wrong = correct
                 while wrong == correct:
-                    wrong = int(rng.randint(0, p))
+                    wrong = int(rng.randint(0, n_classes))
                 self.train_labels[i] = wrong
 
         self._build_tensors()

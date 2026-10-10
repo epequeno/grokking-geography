@@ -103,18 +103,29 @@ class FreezeManager:
         self._frozen.discard(component)
         print(f"[FreezeManager] Unfroze: {component}")
 
-    def restore_frozen(self):
+    def restore_frozen(self, decay: float = 0.0):
         """
-        Restore frozen parameters to their snapshot values.
+        Reset frozen parameters after optimizer.step().
 
-        Call this AFTER optimizer.step() to undo any weight-decay drift
-        on frozen parameters. The optimizer still maintains valid moment
-        estimates (they just see zero gradients), but weight decay would
-        otherwise slowly shrink frozen weights toward zero.
+        Call this AFTER optimizer.step(). The optimizer still maintains valid
+        moment estimates (they just see zero gradients), but momentum and
+        AdamW's decoupled weight decay would otherwise keep moving frozen
+        weights.
+
+        Args:
+            decay: if 0 (default) frozen params are restored exactly to their
+                freeze-time snapshot (no gradient AND no weight decay).
+                If > 0 it is the per-step AdamW shrink factor (lr * weight_decay):
+                the snapshot is shrunk by (1 - decay) each call, so frozen
+                params receive no gradient updates but still feel weight decay.
+                This is the control arm that separates "gradient updates to this
+                component are required" from "this component must be exempt from
+                weight decay".
         """
         for pid, snapshot in self._snapshots.items():
-            p = self._param_by_id[pid]
-            p.data.copy_(snapshot)
+            if decay:
+                snapshot.mul_(1.0 - decay)
+            self._param_by_id[pid].data.copy_(snapshot)
 
     def freeze_all(self):
         """Freeze all components."""

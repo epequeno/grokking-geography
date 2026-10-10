@@ -35,11 +35,9 @@ Usage:
 """
 
 import torch
-import torch.nn.functional as F
 from dataclasses import dataclass
 from typing import Optional, List
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 @dataclass

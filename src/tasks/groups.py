@@ -4,7 +4,6 @@ S_5 permutation composition, dihedral group D_n.
 """
 
 import itertools
-import numpy as np
 from .registry import TaskConfig, TaskDataset, register_task
 
 
@@ -42,6 +41,7 @@ class S5Composition:
             n_ctx=3,
             eq_token=n,
             is_commutative=False,
+            is_group=True,
             group_order=120,
             operation="compose",
         )
@@ -96,6 +96,7 @@ class DihedralComposition:
             n_ctx=3,
             eq_token=size,
             is_commutative=False,
+            is_group=True,
             group_order=size,
             operation="dihedral_mul",
         )

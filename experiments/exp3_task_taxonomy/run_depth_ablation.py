@@ -17,35 +17,31 @@ Run:
     uv run python experiments/exp3_task_taxonomy/run_depth_ablation.py --quick
 """
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
+import os
 
 import argparse
 import json
 import time
 import numpy as np
-import torch
-from copy import deepcopy
 
-from src.models.transformer import GrokTransformer, TransformerConfig
+from src.models.transformer import TransformerConfig, build_model
 from src.tasks.modular import ModularAddition
 from src.tasks.groups import S5Composition, DihedralComposition
 from src.training.trainer import GrokTrainer, TrainConfig
 from src.results import save_result_batch
 
 
-def build_tasks():
+def build_tasks(seed: int):
+    """Tasks are rebuilt per seed so the train/test split varies with the seed."""
     return {
-        "mod_add":     ModularAddition(p=113, train_frac=0.3),
-        "s5_compose":  S5Composition(train_frac=0.3),
-        "dihedral_12": DihedralComposition(n=12, train_frac=0.3),
+        "mod_add":     ModularAddition(p=113, train_frac=0.3, seed=seed),
+        "s5_compose":  S5Composition(train_frac=0.3, seed=seed),
+        "dihedral_12": DihedralComposition(n=12, train_frac=0.3, seed=seed),
     }
 
 
 def run_one(task_name, task, n_layers, n_steps, seed, d_model=128, n_heads=4, d_mlp=512):
     """Run a single (task, depth, seed) experiment."""
-    torch.manual_seed(seed)
-
     model_cfg = TransformerConfig(
         vocab_size=task.transformer_vocab_size,
         n_ctx=3,
@@ -55,7 +51,7 @@ def run_one(task_name, task, n_layers, n_steps, seed, d_model=128, n_heads=4, d_
         d_mlp=d_mlp,
         n_layers=n_layers,
     )
-    model = GrokTransformer(model_cfg)
+    model = build_model(model_cfg, seed)
     n_params = sum(p.numel() for p in model.parameters())
 
     train_cfg = TrainConfig(
@@ -82,6 +78,8 @@ def run_one(task_name, task, n_layers, n_steps, seed, d_model=128, n_heads=4, d_
         "grok_delay": metrics.grok_delay,
         "final_test_acc": metrics.test_acc[-1] if metrics.test_acc else 0.0,
         "final_train_acc": metrics.train_acc[-1] if metrics.train_acc else 0.0,
+        "peak_test_acc": metrics.peak_test_acc,
+        "grok_lost_step": metrics.grok_lost_step,
         "elapsed_seconds": elapsed,
     }
 
@@ -113,25 +111,26 @@ def main():
 
     os.makedirs(args.out_dir, exist_ok=True)
 
-    tasks = build_tasks()
     seeds = list(range(args.seed, args.seed + args.n_seeds))
+    task_names = list(build_tasks(seeds[0]).keys())
 
-    print(f"Depth ablation: {list(tasks.keys())} × layers={args.layers} × {args.n_seeds} seeds")
+    print(f"Depth ablation: {task_names} × layers={args.layers} × {args.n_seeds} seeds")
     print(f"Step limit: {args.steps}")
     print()
 
     all_results = []
 
-    for task_name, task in tasks.items():
+    for task_name in task_names:
         for n_layers in args.layers:
             for seed in seeds:
+                task = build_tasks(seed)[task_name]
                 result = run_one(task_name, task, n_layers, args.steps, seed)
                 all_results.append(result)
 
     # Save immutable artifact
     config = {
         "experiment": "exp3_depth_ablation",
-        "tasks": list(tasks.keys()),
+        "tasks": task_names,
         "layers": args.layers,
         "seeds": seeds,
         "n_seeds": args.n_seeds,
@@ -177,7 +176,7 @@ def main():
               f"{delay_str:<20} {acc_str}")
 
     # Highlight the key comparison
-    print(f"\n--- Key comparison: S5 depth effect ---")
+    print("\n--- Key comparison: S5 depth effect ---")
     for n_layers in args.layers:
         runs = by_key.get(("s5_compose", n_layers), [])
         if runs:

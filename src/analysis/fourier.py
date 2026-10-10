@@ -17,7 +17,6 @@ Key insight from Nanda 2023:
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import Optional
 
 
 def fourier_basis(p: int) -> torch.Tensor:
@@ -122,19 +121,31 @@ def plot_fourier_spectrum(W_E: torch.Tensor, p: int, title: str = "", ax=None):
 
 def fourier_alignment_score(W_E: torch.Tensor, p: int) -> float:
     """
-    Scalar progress measure: fraction of embedding variance explained by
-    the top Fourier modes. Tracks grokking onset.
+    Scalar progress measure: fraction of total embedding Fourier power held by
+    the 6 strongest Fourier modes (3 cos/sin pairs when the top modes pair up).
 
-    Uses top_k = 2 * number_of_key_frequencies to capture complete cos/sin
-    pairs. Each frequency k spans two Fourier basis rows (cos and sin), so
-    top_k must be even to avoid splitting a pair.
+    Near `chance_alignment(p, d_model)` for random embeddings (NOT 0), rising
+    toward 1 for fully Fourier-structured embeddings. Always compare a measured
+    score against that chance floor before calling it structure.
 
-    Goes from ~0 (random embeddings) to ~1 (fully Fourier-structured).
+    Only meaningful when token index == residue (mod_add): the DFT is taken over
+    token ids.
     """
-    # Use top_k that captures ~3 full frequency pairs (6 modes).
-    # For small p this degrades gracefully via the min.
     top_k = min(6, p // 2)
     return fourier_concentration(W_E, p, top_k=top_k)
+
+
+def chance_alignment(p: int, d_model: int, n_draws: int = 20, seed: int = 0) -> float:
+    """
+    Expected fourier_alignment_score of an unstructured embedding: mean over
+    `n_draws` i.i.d. Gaussian [p, d_model] matrices (deterministic given `seed`).
+    """
+    g = torch.Generator().manual_seed(seed)
+    scores = [
+        fourier_alignment_score(torch.randn(p, d_model, generator=g), p)
+        for _ in range(n_draws)
+    ]
+    return float(sum(scores) / len(scores))
 
 
 def key_frequency_alignment(

@@ -1,0 +1,263 @@
+{
+  "_meta": {
+    "config_hash": "1605b4e042f6",
+    "timestamp": "20261010T013239Z",
+    "run_name": "freeze_one_decay_p113_s44",
+    "experiment": "exp1_freeze_sweep",
+    "n_results": 11
+  },
+  "config": {
+    "experiment": "exp1_freeze_sweep",
+    "mode": "freeze_one_decay",
+    "freeze_timing": "per-run mem_step",
+    "prime": 113,
+    "seeds": [
+      44
+    ],
+    "n_seeds": 1,
+    "steps": 40000,
+    "lr": 0.001,
+    "wd": 1.0,
+    "d_model": 128,
+    "n_heads": 4,
+    "d_mlp": 512,
+    "components": [
+      "embedding",
+      "unembedding",
+      "attn_Q",
+      "attn_K",
+      "attn_V",
+      "attn_O",
+      "attn_all",
+      "mlp_in",
+      "mlp_out",
+      "mlp_all"
+    ]
+  },
+  "results": [
+    {
+      "freeze_action": "freeze_one",
+      "target_component": "baseline",
+      "seed": 44,
+      "grok_step": 3000,
+      "mem_step": 600,
+      "grok_delay": 2400,
+      "grokked": true,
+      "freeze_events": [],
+      "peak_test_acc": 1.0,
+      "final_test_acc": 1.0,
+      "final_train_acc": 1.0,
+      "elapsed_seconds": 117.02529406547546
+    },
+    {
+      "freeze_action": "freeze_one_decay",
+      "target_component": "embedding",
+      "seed": 44,
+      "grok_step": null,
+      "mem_step": 600,
+      "grok_delay": null,
+      "grokked": false,
+      "freeze_events": [
+        {
+          "step": 601,
+          "action": "freeze",
+          "component": "embedding",
+          "trigger": "mem_step"
+        }
+      ],
+      "peak_test_acc": 0.6471641063690186,
+      "final_test_acc": 0.007607114966958761,
+      "final_train_acc": 0.011749347671866417,
+      "elapsed_seconds": 1610.3230600357056
+    },
+    {
+      "freeze_action": "freeze_one_decay",
+      "target_component": "unembedding",
+      "seed": 44,
+      "grok_step": null,
+      "mem_step": 600,
+      "grok_delay": null,
+      "grokked": false,
+      "freeze_events": [
+        {
+          "step": 601,
+          "action": "freeze",
+          "component": "unembedding",
+          "trigger": "mem_step"
+        }
+      ],
+      "peak_test_acc": 0.9899317622184753,
+      "final_test_acc": 0.009061416611075401,
+      "final_train_acc": 0.008355091325938702,
+      "elapsed_seconds": 1345.654863834381
+    },
+    {
+      "freeze_action": "freeze_one_decay",
+      "target_component": "attn_Q",
+      "seed": 44,
+      "grok_step": 2800,
+      "mem_step": 600,
+      "grok_delay": 2200,
+      "grokked": true,
+      "freeze_events": [
+        {
+          "step": 601,
+          "action": "freeze",
+          "component": "attn_Q",
+          "trigger": "mem_step"
+        }
+      ],
+      "peak_test_acc": 1.0,
+      "final_test_acc": 1.0,
+      "final_train_acc": 1.0,
+      "elapsed_seconds": 182.94657683372498
+    },
+    {
+      "freeze_action": "freeze_one_decay",
+      "target_component": "attn_K",
+      "seed": 44,
+      "grok_step": 2800,
+      "mem_step": 600,
+      "grok_delay": 2200,
+      "grokked": true,
+      "freeze_events": [
+        {
+          "step": 601,
+          "action": "freeze",
+          "component": "attn_K",
+          "trigger": "mem_step"
+        }
+      ],
+      "peak_test_acc": 1.0,
+      "final_test_acc": 1.0,
+      "final_train_acc": 1.0,
+      "elapsed_seconds": 183.59115290641785
+    },
+    {
+      "freeze_action": "freeze_one_decay",
+      "target_component": "attn_V",
+      "seed": 44,
+      "grok_step": 3000,
+      "mem_step": 600,
+      "grok_delay": 2400,
+      "grokked": true,
+      "freeze_events": [
+        {
+          "step": 601,
+          "action": "freeze",
+          "component": "attn_V",
+          "trigger": "mem_step"
+        }
+      ],
+      "peak_test_acc": 1.0,
+      "final_test_acc": 1.0,
+      "final_train_acc": 1.0,
+      "elapsed_seconds": 199.35521697998047
+    },
+    {
+      "freeze_action": "freeze_one_decay",
+      "target_component": "attn_O",
+      "seed": 44,
+      "grok_step": 2800,
+      "mem_step": 600,
+      "grok_delay": 2200,
+      "grokked": true,
+      "freeze_events": [
+        {
+          "step": 601,
+          "action": "freeze",
+          "component": "attn_O",
+          "trigger": "mem_step"
+        }
+      ],
+      "peak_test_acc": 1.0,
+      "final_test_acc": 1.0,
+      "final_train_acc": 1.0,
+      "elapsed_seconds": 189.05524730682373
+    },
+    {
+      "freeze_action": "freeze_one_decay",
+      "target_component": "attn_all",
+      "seed": 44,
+      "grok_step": null,
+      "mem_step": 600,
+      "grok_delay": null,
+      "grokked": false,
+      "freeze_events": [
+        {
+          "step": 601,
+          "action": "freeze",
+          "component": "attn_all",
+          "trigger": "mem_step"
+        }
+      ],
+      "peak_test_acc": 0.9668866991996765,
+      "final_test_acc": 0.007607114966958761,
+      "final_train_acc": 0.011749347671866417,
+      "elapsed_seconds": 1625.7503616809845
+    },
+    {
+      "freeze_action": "freeze_one_decay",
+      "target_component": "mlp_in",
+      "seed": 44,
+      "grok_step": 3400,
+      "mem_step": 600,
+      "grok_delay": 2800,
+      "grokked": true,
+      "freeze_events": [
+        {
+          "step": 601,
+          "action": "freeze",
+          "component": "mlp_in",
+          "trigger": "mem_step"
+        }
+      ],
+      "peak_test_acc": 0.9947421550750732,
+      "final_test_acc": 0.9623000621795654,
+      "final_train_acc": 0.9953002333641052,
+      "elapsed_seconds": 181.10309505462646
+    },
+    {
+      "freeze_action": "freeze_one_decay",
+      "target_component": "mlp_out",
+      "seed": 44,
+      "grok_step": 4000,
+      "mem_step": 600,
+      "grok_delay": 3400,
+      "grokked": true,
+      "freeze_events": [
+        {
+          "step": 601,
+          "action": "freeze",
+          "component": "mlp_out",
+          "trigger": "mem_step"
+        }
+      ],
+      "peak_test_acc": 0.9900436401367188,
+      "final_test_acc": 0.9339970946311951,
+      "final_train_acc": 0.9942559003829956,
+      "elapsed_seconds": 208.48602533340454
+    },
+    {
+      "freeze_action": "freeze_one_decay",
+      "target_component": "mlp_all",
+      "seed": 44,
+      "grok_step": null,
+      "mem_step": 600,
+      "grok_delay": null,
+      "grokked": false,
+      "freeze_events": [
+        {
+          "step": 601,
+          "action": "freeze",
+          "component": "mlp_all",
+          "trigger": "mem_step"
+        }
+      ],
+      "peak_test_acc": 0.9703546166419983,
+      "final_test_acc": 0.9677816033363342,
+      "final_train_acc": 0.9997389316558838,
+      "elapsed_seconds": 1206.7683970928192
+    }
+  ]
+}

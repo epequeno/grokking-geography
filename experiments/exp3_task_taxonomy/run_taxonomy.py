@@ -30,38 +30,35 @@ Run:
     python experiments/exp3_task_taxonomy/run_taxonomy.py --quick  # smaller runs
 """
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
+import os
 
 import argparse
 import json
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-from src.models.transformer import GrokTransformer, TransformerConfig
+from src.models.transformer import TransformerConfig, build_model
 from src.tasks.modular import ModularAddition, ModularMultiplication, ModularExponentiation, ModularDivision
 from src.tasks.groups import S5Composition, DihedralComposition
 from src.tasks.boolean import XORTask, ParityTask
 from src.training.trainer import GrokTrainer, TrainConfig
 
 
-def build_task_list(quick: bool = False):
-    """Build the list of tasks to run. Returns [(name, task_obj), ...]."""
+def build_task_list(seed: int, quick: bool = False):
+    """Build the tasks for one seed (the seed also fixes the train/test split)."""
     p = 97 if quick else 113
-    tasks = [
-        ("mod_add",    ModularAddition(p=p)),
-        ("mod_mul",    ModularMultiplication(p=p)),
-        ("mod_exp",    ModularExponentiation(p=97)),
-        ("mod_div",    ModularDivision(p=p)),
-        ("s5_compose", S5Composition()),
-        ("dihedral_12",DihedralComposition(n=12)),
-        ("xor_6bit",   XORTask(n_bits=6)),
-        ("xor_5bit",   XORTask(n_bits=5)),
-        ("parity_8bit",ParityTask(n_bits=8)),
+    return [
+        ("mod_add",    ModularAddition(p=p, seed=seed)),
+        ("mod_mul",    ModularMultiplication(p=p, seed=seed)),
+        ("mod_exp",    ModularExponentiation(p=97, seed=seed)),
+        ("mod_div",    ModularDivision(p=p, seed=seed)),
+        ("s5_compose", S5Composition(seed=seed)),
+        ("dihedral_12", DihedralComposition(n=12, seed=seed)),
+        ("xor_6bit",   XORTask(n_bits=6, seed=seed)),
+        ("xor_5bit",   XORTask(n_bits=5, seed=seed)),
+        ("parity_8bit", ParityTask(n_bits=8, seed=seed)),
     ]
-    return tasks
 
 
 def run_task(name: str, task, n_steps: int, seed: int, use_wandb: bool) -> dict:
@@ -77,7 +74,7 @@ def run_task(name: str, task, n_steps: int, seed: int, use_wandb: bool) -> dict:
         d_mlp=512,
         n_layers=1,
     )
-    model = GrokTransformer(model_cfg)
+    model = build_model(model_cfg, seed)
 
     train_cfg = TrainConfig(
         n_steps=n_steps,
@@ -102,10 +99,15 @@ def run_task(name: str, task, n_steps: int, seed: int, use_wandb: bool) -> dict:
         "grok_delay": metrics.grok_delay,
         "final_test_acc": metrics.test_acc[-1] if metrics.test_acc else 0.0,
         "final_train_acc": metrics.train_acc[-1] if metrics.train_acc else 0.0,
+        "peak_test_acc": metrics.peak_test_acc,
+        "grok_lost_step": metrics.grok_lost_step,
+        "n_train": len(task.dataset.train_labels),
+        "n_test": len(task.dataset.test_labels),
         "elapsed_seconds": metrics.elapsed_seconds,
         # Task structural properties (from TaskConfig)
         "vocab_size": task.cfg.vocab_size,
         "is_commutative": task.cfg.is_commutative,
+        "is_group": task.cfg.is_group,
         "group_order": task.cfg.group_order,
         "operation": task.cfg.operation,
         # Learning curves (for visualization)
@@ -131,8 +133,8 @@ def plot_taxonomy(all_results: list, out_dir: str):
     tasks = list(by_task.keys())
     grokked = [any(r["grokked"] for r in by_task[t]) for t in tasks]
     grok_delays = [
-        np.mean([r["grok_delay"] for r in by_task[t] if r["grok_delay"]]) 
-        if any(r["grok_delay"] for r in by_task[t]) else None
+        np.mean([r["grok_delay"] for r in by_task[t] if r["grok_delay"] is not None])
+        if any(r["grok_delay"] is not None for r in by_task[t]) else None
         for t in tasks
     ]
     test_accs = [np.mean([r["final_test_acc"] for r in by_task[t]]) for t in tasks]
@@ -213,14 +215,12 @@ def main():
 
     os.makedirs(args.out_dir, exist_ok=True)
 
-    tasks = build_task_list(quick=args.quick)
-    print(f"Running taxonomy on {len(tasks)} tasks × {args.n_seeds} seeds")
+    print(f"Running taxonomy × {args.n_seeds} seeds")
 
     all_results = []
-    for name, task in tasks:
-        for seed in range(args.seed, args.seed + args.n_seeds):
-            result = run_task(name, task, args.steps, seed, args.use_wandb)
-            all_results.append(result)
+    for seed in range(args.seed, args.seed + args.n_seeds):
+        for name, task in build_task_list(seed, quick=args.quick):
+            all_results.append(run_task(name, task, args.steps, seed, args.use_wandb))
 
     # Save (exclude large arrays)
     out_path = os.path.join(args.out_dir, "taxonomy_results.json")

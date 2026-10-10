@@ -1,0 +1,436 @@
+[
+  {
+    "freeze_action": "freeze_one",
+    "target_component": "baseline",
+    "seed": 43,
+    "grok_step": 6400,
+    "mem_step": 800,
+    "grok_delay": 5600,
+    "grokked": true,
+    "freeze_events": [],
+    "peak_test_acc": 1.0,
+    "final_test_acc": 1.0,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 209.2588918209076
+  },
+  {
+    "freeze_action": "freeze_one",
+    "target_component": "embedding",
+    "seed": 43,
+    "grok_step": null,
+    "mem_step": 800,
+    "grok_delay": null,
+    "grokked": false,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "embedding",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 0.1801096349954605,
+    "final_test_acc": 0.17843158543109894,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 1210.0816297531128
+  },
+  {
+    "freeze_action": "freeze_one",
+    "target_component": "unembedding",
+    "seed": 43,
+    "grok_step": null,
+    "mem_step": 800,
+    "grok_delay": null,
+    "grokked": false,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "unembedding",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 0.9879181385040283,
+    "final_test_acc": 0.9742700457572937,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 1407.5587980747223
+  },
+  {
+    "freeze_action": "freeze_one",
+    "target_component": "attn_Q",
+    "seed": 43,
+    "grok_step": 6800,
+    "mem_step": 800,
+    "grok_delay": 6000,
+    "grokked": true,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "attn_Q",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 1.0,
+    "final_test_acc": 1.0,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 385.91227293014526
+  },
+  {
+    "freeze_action": "freeze_one",
+    "target_component": "attn_K",
+    "seed": 43,
+    "grok_step": 7400,
+    "mem_step": 800,
+    "grok_delay": 6600,
+    "grokked": true,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "attn_K",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 1.0,
+    "final_test_acc": 1.0,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 419.5530421733856
+  },
+  {
+    "freeze_action": "freeze_one",
+    "target_component": "attn_V",
+    "seed": 43,
+    "grok_step": 7800,
+    "mem_step": 800,
+    "grok_delay": 7000,
+    "grokked": true,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "attn_V",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 1.0,
+    "final_test_acc": 1.0,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 385.8980610370636
+  },
+  {
+    "freeze_action": "freeze_one",
+    "target_component": "attn_O",
+    "seed": 43,
+    "grok_step": 7800,
+    "mem_step": 800,
+    "grok_delay": 7000,
+    "grokked": true,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "attn_O",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 1.0,
+    "final_test_acc": 1.0,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 394.6179141998291
+  },
+  {
+    "freeze_action": "freeze_one",
+    "target_component": "attn_all",
+    "seed": 43,
+    "grok_step": 9400,
+    "mem_step": 800,
+    "grok_delay": 8600,
+    "grokked": true,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "attn_all",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 1.0,
+    "final_test_acc": 1.0,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 383.6902461051941
+  },
+  {
+    "freeze_action": "freeze_one",
+    "target_component": "mlp_in",
+    "seed": 43,
+    "grok_step": 11000,
+    "mem_step": 800,
+    "grok_delay": 10200,
+    "grokked": true,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "mlp_in",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 1.0,
+    "final_test_acc": 1.0,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 426.4751980304718
+  },
+  {
+    "freeze_action": "freeze_one",
+    "target_component": "mlp_out",
+    "seed": 43,
+    "grok_step": 13000,
+    "mem_step": 800,
+    "grok_delay": 12200,
+    "grokked": true,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "mlp_out",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 1.0,
+    "final_test_acc": 1.0,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 499.5553116798401
+  },
+  {
+    "freeze_action": "freeze_one",
+    "target_component": "mlp_all",
+    "seed": 43,
+    "grok_step": null,
+    "mem_step": 800,
+    "grok_delay": null,
+    "grokked": false,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "mlp_all",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 0.03769996762275696,
+    "final_test_acc": 0.03389640897512436,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 1551.5968608856201
+  },
+  {
+    "freeze_action": "freeze_one_decay",
+    "target_component": "embedding",
+    "seed": 43,
+    "grok_step": null,
+    "mem_step": 800,
+    "grok_delay": null,
+    "grokked": false,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "embedding",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 0.20237162709236145,
+    "final_test_acc": 0.007607114966958761,
+    "final_train_acc": 0.011749347671866417,
+    "elapsed_seconds": 1462.4527401924133
+  },
+  {
+    "freeze_action": "freeze_one_decay",
+    "target_component": "unembedding",
+    "seed": 43,
+    "grok_step": null,
+    "mem_step": 800,
+    "grok_delay": null,
+    "grokked": false,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "unembedding",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 0.42051684856414795,
+    "final_test_acc": 0.008613938465714455,
+    "final_train_acc": 0.009399477392435074,
+    "elapsed_seconds": 1210.8249399662018
+  },
+  {
+    "freeze_action": "freeze_one_decay",
+    "target_component": "attn_Q",
+    "seed": 43,
+    "grok_step": 5800,
+    "mem_step": 800,
+    "grok_delay": 5000,
+    "grokked": true,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "attn_Q",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 1.0,
+    "final_test_acc": 1.0,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 177.26524114608765
+  },
+  {
+    "freeze_action": "freeze_one_decay",
+    "target_component": "attn_K",
+    "seed": 43,
+    "grok_step": 6400,
+    "mem_step": 800,
+    "grok_delay": 5600,
+    "grokked": true,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "attn_K",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 1.0,
+    "final_test_acc": 1.0,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 176.25739192962646
+  },
+  {
+    "freeze_action": "freeze_one_decay",
+    "target_component": "attn_V",
+    "seed": 43,
+    "grok_step": 6400,
+    "mem_step": 800,
+    "grok_delay": 5600,
+    "grokked": true,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "attn_V",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 0.9967557787895203,
+    "final_test_acc": 0.9964202046394348,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 176.94106602668762
+  },
+  {
+    "freeze_action": "freeze_one_decay",
+    "target_component": "attn_O",
+    "seed": 43,
+    "grok_step": 6000,
+    "mem_step": 800,
+    "grok_delay": 5200,
+    "grokked": true,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "attn_O",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 0.9983219504356384,
+    "final_test_acc": 0.9956371188163757,
+    "final_train_acc": 1.0,
+    "elapsed_seconds": 175.94207096099854
+  },
+  {
+    "freeze_action": "freeze_one_decay",
+    "target_component": "attn_all",
+    "seed": 43,
+    "grok_step": null,
+    "mem_step": 800,
+    "grok_delay": null,
+    "grokked": false,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "attn_all",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 0.1238393560051918,
+    "final_test_acc": 0.007607114966958761,
+    "final_train_acc": 0.011749347671866417,
+    "elapsed_seconds": 822.0466089248657
+  },
+  {
+    "freeze_action": "freeze_one_decay",
+    "target_component": "mlp_in",
+    "seed": 43,
+    "grok_step": null,
+    "mem_step": 800,
+    "grok_delay": null,
+    "grokked": false,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "mlp_in",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 0.9898198843002319,
+    "final_test_acc": 0.9845620393753052,
+    "final_train_acc": 0.9997389316558838,
+    "elapsed_seconds": 706.2533240318298
+  },
+  {
+    "freeze_action": "freeze_one_decay",
+    "target_component": "mlp_out",
+    "seed": 43,
+    "grok_step": null,
+    "mem_step": 800,
+    "grok_delay": null,
+    "grokked": false,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "mlp_out",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 0.8219040036201477,
+    "final_test_acc": 0.8208972215652466,
+    "final_train_acc": 0.992689311504364,
+    "elapsed_seconds": 352.2345521450043
+  },
+  {
+    "freeze_action": "freeze_one_decay",
+    "target_component": "mlp_all",
+    "seed": 43,
+    "grok_step": null,
+    "mem_step": 800,
+    "grok_delay": null,
+    "grokked": false,
+    "freeze_events": [
+      {
+        "step": 801,
+        "action": "freeze",
+        "component": "mlp_all",
+        "trigger": "mem_step"
+      }
+    ],
+    "peak_test_acc": 0.9761718511581421,
+    "final_test_acc": 0.9661036133766174,
+    "final_train_acc": 0.9979112148284912,
+    "elapsed_seconds": 190.32994890213013
+  }
+]

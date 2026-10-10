@@ -13,7 +13,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import einops
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -232,3 +231,16 @@ class GrokTransformer(nn.Module):
             for name, params in groups.items()
             if params
         }
+
+
+def build_model(cfg: TransformerConfig, seed: int) -> GrokTransformer:
+    """
+    Construct a GrokTransformer with deterministic initialisation.
+
+    Parameters are drawn from torch's global RNG at construction time, so the
+    RNG MUST be seeded *before* the model is built; seeding only inside
+    GrokTrainer (which runs after construction) leaves init dependent on
+    whatever RNG state earlier runs in the process left behind.
+    """
+    torch.manual_seed(seed)
+    return GrokTransformer(cfg)

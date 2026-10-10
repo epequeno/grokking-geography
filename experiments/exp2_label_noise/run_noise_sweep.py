@@ -16,8 +16,7 @@ Run:
     python experiments/exp2_label_noise/run_noise_sweep.py --noise_levels 0.0 0.05 0.1 0.2 0.3 0.4 0.5
 """
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
+import os
 
 import argparse
 import json
@@ -25,10 +24,10 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.models.transformer import GrokTransformer, TransformerConfig
+from src.models.transformer import TransformerConfig, build_model
 from src.tasks import ModularAddition
 from src.training.trainer import GrokTrainer, TrainConfig
-from src.analysis.fourier import fourier_alignment_score, fourier_power_spectrum
+from src.analysis.fourier import fourier_power_spectrum, chance_alignment
 
 
 def run_noise_experiment(
@@ -45,8 +44,7 @@ def run_noise_experiment(
 
     task = ModularAddition(p=p, train_frac=train_frac, noise_frac=noise_frac, seed=seed)
 
-    torch.manual_seed(seed)
-    model = GrokTransformer(model_cfg)
+    model = build_model(model_cfg, seed)
     cfg   = dataclasses.replace(train_cfg, run_name=f"noise_{noise_frac:.2f}_s{seed}")
 
     trainer      = GrokTrainer(model, task, cfg)
@@ -69,6 +67,9 @@ def run_noise_experiment(
         "final_test_acc":      train_metrics.test_acc[-1]  if train_metrics.test_acc  else 0.0,
         "final_train_acc":     train_metrics.train_acc[-1] if train_metrics.train_acc else 0.0,
         "final_fourier_score": final_fourier_score,
+        "fourier_chance_floor": chance_alignment(p, model_cfg.d_model),
+        "peak_test_acc":       train_metrics.peak_test_acc,
+        "grok_lost_step":      train_metrics.grok_lost_step,
         "dominant_frequencies": dom_freqs,
         "fourier_spectrum":    spectrum.tolist(),
         "n_corrupted_labels":  int(len(task.dataset.train_labels) * noise_frac),
@@ -92,7 +93,7 @@ def plot_results(all_results: list, out_dir: str, p: int):
     """Generate summary plots for the noise sweep."""
     noise_levels = [r["noise_frac"] for r in all_results]
     grokked = [r["grokked"] for r in all_results]
-    grok_delays = [r["grok_delay"] if r["grok_delay"] is not None else None for r in all_results]
+    grok_delays = [r["grok_delay"] for r in all_results]
     fourier_scores = [r["final_fourier_score"] for r in all_results]
     test_accs = [r["final_test_acc"] for r in all_results]
 
@@ -244,8 +245,9 @@ def main():
             "grokked":             any(r["grokked"] for r in runs),
             "final_test_acc":      np.mean([r["final_test_acc"] for r in runs]),
             "final_fourier_score": np.mean([r["final_fourier_score"] for r in runs]),
-            "grok_delay":          (np.mean([r["grok_delay"] for r in runs if r["grok_delay"]])
-                                    if any(r["grok_delay"] for r in runs) else None),
+            "grok_delay":          (np.mean([r["grok_delay"] for r in runs if r["grok_delay"] is not None])
+                                    if any(r["grok_delay"] is not None for r in runs) else None),
+            "peak_test_acc":       np.mean([r["peak_test_acc"] for r in runs]),
             "steps":               ref_run["steps"][:min_len],
             "test_acc":            [np.mean([r["test_acc"][i] for r in runs])
                                     for i in range(min_len)],

@@ -27,14 +27,13 @@ Run:
     uv run python experiments/exp1_surgical_freeze/run_joint_sufficiency.py
 """
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
-
-import json, argparse, time
-import torch
+import argparse
+import json
+import os
+import time
 from copy import deepcopy
 
-from src.models.transformer import GrokTransformer, TransformerConfig
+from src.models.transformer import TransformerConfig, build_model
 from src.tasks.modular import ModularAddition
 from src.training.trainer import GrokTrainer, TrainConfig
 from src.freezing.manager import FreezeManager
@@ -64,15 +63,12 @@ STEP_BUDGETS = {
 
 
 def run_combination(name, keep_unfrozen, task, train_cfg, seed):
-    torch.manual_seed(seed)
-
     # Rebuild model_cfg from task (always same architecture)
-    from src.models.transformer import TransformerConfig
     model_cfg = TransformerConfig(
         vocab_size=task.transformer_vocab_size,
         n_ctx=3, d_model=128, n_heads=4, d_head=32, d_mlp=512, n_layers=1,
     )
-    model = GrokTransformer(model_cfg)
+    model = build_model(model_cfg, seed)
     fm    = FreezeManager(model)
 
     cfg = deepcopy(train_cfg)
@@ -111,35 +107,34 @@ def main():
     parser.add_argument("--lr",        type=float, default=1e-3)
     parser.add_argument("--wd",        type=float, default=1.0)
     parser.add_argument("--seed",      type=int,   default=42)
+    parser.add_argument("--n_seeds",   type=int,   default=3)
     parser.add_argument("--log_every", type=int,   default=200)
     parser.add_argument("--out_dir",   type=str,   default="results/exp1_joint_sufficiency")
     args = parser.parse_args()
 
     os.makedirs(args.out_dir, exist_ok=True)
 
-    task = ModularAddition(p=args.prime, train_frac=args.train_frac, seed=args.seed)
-    model_cfg = TransformerConfig(
-        vocab_size=task.transformer_vocab_size,
-        n_ctx=3, d_model=128, n_heads=4, d_head=32, d_mlp=512, n_layers=1,
-    )
     train_cfg_base = TrainConfig(
         n_steps=args.steps, lr=args.lr, weight_decay=args.wd,
         log_every=args.log_every, seed=args.seed,
     )
 
-    print(f"Joint sufficiency sweep — p={args.prime}, {len(COMBINATIONS)} combinations\n")
-    print(f"{'Combination':<24} {'Keep unfrozen':<35} {'Grokked':<9} {'Grok step':<12} {'Test acc'}")
-    print("-" * 90)
+    seeds = list(range(args.seed, args.seed + args.n_seeds))
+    print(f"Joint sufficiency sweep — p={args.prime}, {len(COMBINATIONS)} combinations × {len(seeds)} seeds\n")
+    print(f"{'Combination':<20} {'Seed':<6} {'Grokked':<9} {'Grok step':<12} {'Test acc'}")
+    print("-" * 70)
 
     all_results = []
-    for name, keep in COMBINATIONS:
-        print(f"{name:<24} {str(keep):<35} ", end="", flush=True)
-        budget = STEP_BUDGETS.get(name, args.steps)
-        cfg_for_run = deepcopy(train_cfg_base)
-        cfg_for_run.n_steps = budget
-        r = run_combination(name, keep, task, cfg_for_run, args.seed)
-        all_results.append(r)
-        print(f"{str(r['grokked']):<9} {str(r['grok_step']):<12} {r['final_test_acc']:.4f}")
+    for seed in seeds:
+        task = ModularAddition(p=args.prime, train_frac=args.train_frac, seed=seed)
+        for name, keep in COMBINATIONS:
+            print(f"{name:<20} {seed:<6} ", end="", flush=True)
+            cfg_for_run = deepcopy(train_cfg_base)
+            cfg_for_run.n_steps = STEP_BUDGETS.get(name, args.steps)
+            cfg_for_run.seed = seed
+            r = run_combination(name, keep, task, cfg_for_run, seed)
+            all_results.append(r)
+            print(f"{str(r['grokked']):<9} {str(r['grok_step']):<12} {r['final_test_acc']:.4f}")
 
     # Save (strip large arrays for the compact summary)
     summary_path = os.path.join(args.out_dir, f"joint_sufficiency_p{args.prime}_s{args.seed}.json")

@@ -22,6 +22,7 @@ class XORTask:
             n_ctx=3,
             eq_token=vocab,
             is_commutative=True,
+            is_group=True,
             group_order=vocab,
             operation="xor",
             description=f"{n_bits}-bit XOR"
@@ -50,7 +51,9 @@ class ParityTask:
             n_ctx=3,
             eq_token=vocab,
             is_commutative=True,
-            group_order=2,
+            is_group=False,   # binary-valued function of two inputs, not a group operation
+            group_order=None,
+            n_classes=2,      # labels are {0, 1}; noise must stay inside this set
             operation="parity",
             description=f"{n_bits}-bit parity"
         )

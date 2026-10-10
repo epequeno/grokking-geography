@@ -6,6 +6,7 @@ from .fourier import (
     dominant_frequencies,
     plot_fourier_spectrum,
     fourier_alignment_score,
+    chance_alignment,
     key_frequency_alignment,
 )
 from .logit_lens import LogitLens, LogitLensResult, plot_logit_lens_trajectory, plot_logit_lens_heatmap
